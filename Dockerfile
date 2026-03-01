@@ -1,17 +1,18 @@
-FROM php:8.4-cli
+FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
-    curl zip unzip git \
-    libpng-dev libxml2-dev libzip-dev libonig-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring xml zip tokenizer
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    && docker-php-ext-install pdo_mysql mbstring xml zip
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www
 
-WORKDIR /app
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
-
-EXPOSE 8080
-
-CMD php artisan serve --host=0.0.0.0 --port=8080
+CMD ["php-fpm"]
