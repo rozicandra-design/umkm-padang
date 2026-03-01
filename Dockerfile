@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mbstring xml zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Konfigurasi Nginx
 RUN echo 'server { \
     listen 80; \
     root /var/www/html/public; \
@@ -28,5 +27,4 @@ COPY . .
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Start both nginx and php-fpm
-CMD service nginx start && php-fpm
+CMD php artisan migrate --force && service nginx start && php-fpm
