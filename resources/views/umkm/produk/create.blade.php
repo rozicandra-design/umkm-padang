@@ -3,7 +3,7 @@
 @section('page-title', 'Tambah Produk Baru')
 
 @section('dashboard-content')
-<div class="card" style="max-width:700px">
+<div class="card">
     <div class="card-header">
         <h3 class="card-title"><i class="fa fa-plus-circle"></i> Form Tambah Produk</h3>
         <a href="{{ route('umkm.produk.index') }}" class="btn btn-sm btn-outline-blue">← Kembali</a>
@@ -64,10 +64,29 @@
                 </div>
             </div>
 
+            {{-- FOTO PRODUK + PREVIEW --}}
             <div class="form-group">
                 <label class="form-label">Foto Produk</label>
-                <input type="file" name="images[]" class="form-input" multiple accept="image/*">
-                <div style="font-size:12px;color:#6B7A90;margin-top:4px">Bisa upload lebih dari 1 foto (max 2MB per foto)</div>
+
+                <label for="fotoInput" style="
+                    display:flex; align-items:center; gap:10px;
+                    border:2px dashed #cbd5e1; border-radius:10px;
+                    padding:16px 20px; cursor:pointer;
+                    background:#f8fafc; transition:border-color .2s;
+                " onmouseover="this.style.borderColor='#3b6cf7'" onmouseout="this.style.borderColor='#cbd5e1'">
+                    <i class="fa fa-cloud-upload" style="font-size:22px;color:#3b6cf7"></i>
+                    <div>
+                        <div style="font-weight:600;font-size:13.5px;color:#1e293b">Pilih Foto Produk</div>
+                        <div style="font-size:12px;color:#94a3b8">Bisa pilih lebih dari 1 foto · Max 2MB per foto</div>
+                    </div>
+                </label>
+                <input type="file" name="images[]" id="fotoInput" multiple accept="image/*"
+                    style="display:none" onchange="previewFoto(this)">
+
+                {{-- Area Preview --}}
+                <div id="previewContainer" style="
+                    display:flex; flex-wrap:wrap; gap:12px; margin-top:14px;
+                "></div>
             </div>
 
             <div style="display:flex;gap:12px;margin-top:8px">
@@ -77,4 +96,63 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function previewFoto(input) {
+    const container = document.getElementById('previewContainer');
+    container.innerHTML = '';
+
+    if (!input.files || input.files.length === 0) return;
+
+    Array.from(input.files).forEach((file, index) => {
+        if (!file.type.startsWith('image/')) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = `
+                position:relative; width:110px; height:110px;
+                border-radius:10px; overflow:hidden;
+                border:2px solid #e2e8f0; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+            `;
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+
+            // Badge nomor foto
+            const badge = document.createElement('div');
+            badge.style.cssText = `
+                position:absolute; bottom:5px; left:5px;
+                background:rgba(0,0,0,0.55); color:#fff;
+                font-size:10px; font-weight:600;
+                padding:2px 6px; border-radius:20px;
+            `;
+            badge.textContent = 'Foto ' + (index + 1);
+
+            // Tombol hapus
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.innerHTML = '&times;';
+            del.style.cssText = `
+                position:absolute; top:4px; right:4px;
+                background:rgba(239,68,68,0.85); color:#fff;
+                border:none; border-radius:50%;
+                width:20px; height:20px; font-size:14px;
+                cursor:pointer; line-height:1; padding:0;
+                display:flex; align-items:center; justify-content:center;
+            `;
+            del.onclick = function() { wrap.remove(); };
+
+            wrap.appendChild(img);
+            wrap.appendChild(badge);
+            wrap.appendChild(del);
+            container.appendChild(wrap);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+</script>
+@endpush
 @endsection

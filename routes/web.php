@@ -11,6 +11,7 @@ use App\Http\Controllers\Customer\OrderController as CustomerOrder;
 use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ReviewController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfile;
+use App\Http\Controllers\Customer\AddressController as CustomerAddress;
 use App\Http\Controllers\Umkm\DashboardController as UmkmDashboard;
 use App\Http\Controllers\Umkm\ProductController as UmkmProduct;
 use App\Http\Controllers\Umkm\OrderController as UmkmOrder;
@@ -75,6 +76,12 @@ Route::middleware(['auth', 'role:customer'])->prefix('pelanggan')->name('custome
 
     // Ulasan
     Route::post('/ulasan/{orderItem}', [ReviewController::class, 'store'])->name('ulasan.store');
+
+    // Alamat
+    Route::get('/alamat', [CustomerAddress::class, 'index'])->name('address.index');
+    Route::post('/alamat', [CustomerAddress::class, 'store'])->name('address.store');
+    Route::delete('/alamat/{address}', [CustomerAddress::class, 'destroy'])->name('address.destroy');
+    Route::patch('/alamat/{address}/default', [CustomerAddress::class, 'setDefault'])->name('address.default');
 });
 
 /*

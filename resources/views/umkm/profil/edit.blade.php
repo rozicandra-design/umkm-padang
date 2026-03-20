@@ -3,7 +3,7 @@
 @section('page-title', 'Edit Profil Toko')
 
 @section('dashboard-content')
-<div class="card" style="max-width:700px">
+<div class="card">
     <div class="card-header">
         <h3 class="card-title"><i class="fa fa-store"></i> Informasi Toko</h3>
         @if(auth()->user()->umkmProfile)
@@ -93,18 +93,55 @@
                 </div>
             </div>
 
+            {{-- LOGO / FOTO TOKO + PREVIEW --}}
             <div class="form-group">
                 <label class="form-label">Logo / Foto Toko</label>
-                <input type="file" name="logo" class="form-input" accept="image/*">
-                @if(isset($umkm) && $umkm->logo)
-                <div style="margin-top:8px">
-                    <img src="{{ asset('storage/'.$umkm->logo) }}" style="height:60px;border-radius:8px">
+
+                <label for="logoInput" style="
+                    display:flex; align-items:center; gap:10px;
+                    border:2px dashed #cbd5e1; border-radius:10px;
+                    padding:16px 20px; cursor:pointer;
+                    background:#f8fafc; transition:border-color .2s;
+                " onmouseover="this.style.borderColor='#3b6cf7'" onmouseout="this.style.borderColor='#cbd5e1'">
+                    <i class="fa fa-cloud-upload" style="font-size:22px;color:#3b6cf7"></i>
+                    <div>
+                        <div style="font-weight:600;font-size:13.5px;color:#1e293b">Pilih Logo / Foto Toko</div>
+                        <div style="font-size:12px;color:#94a3b8">Format JPG, PNG · Max 2MB</div>
+                    </div>
+                </label>
+                <input type="file" name="logo" id="logoInput" accept="image/*"
+                    style="display:none" onchange="previewLogo(this)">
+
+                {{-- Preview: tampilkan foto lama jika ada, diganti kalau pilih baru --}}
+                <div style="margin-top:12px">
+                    <img id="logoPreview"
+                        src="{{ (isset($umkm) && $umkm->logo) ? asset('storage/'.$umkm->logo) : '' }}"
+                        style="height:100px; border-radius:10px; border:2px solid #e2e8f0;
+                               object-fit:cover; display:{{ (isset($umkm) && $umkm->logo) ? 'block' : 'none' }};">
                 </div>
-                @endif
             </div>
 
             <button type="submit" class="btn btn-blue"><i class="fa fa-save"></i> Simpan Perubahan</button>
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function previewLogo(input) {
+    const preview = document.getElementById('logoPreview');
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+</script>
+@endpush
 @endsection

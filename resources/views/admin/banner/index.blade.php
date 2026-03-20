@@ -26,6 +26,7 @@
                     <th>Judul</th>
                     <th>Link</th>
                     <th>Urutan</th>
+                    <th>Kadaluarsa</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -48,7 +49,19 @@
                             <span class="text-muted">-</span>
                         @endif
                     </td>
-                    <td>{{ $banner->order }}</td>
+                    <td>{{ $banner->sort_order }}</td>
+                    <td>
+                        @if($banner->expired_at)
+                            <span style="font-size:12px;color:{{ $banner->expired_at->isPast() ? '#dc2626' : '#374151' }}">
+                                {{ $banner->expired_at->format('d M Y') }}
+                                @if($banner->expired_at->isPast())
+                                    <span style="color:#dc2626;font-weight:600;">(Expired)</span>
+                                @endif
+                            </span>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
                     <td>
                         <span class="badge {{ $banner->is_active ? 'badge-green' : 'badge-red' }}">
                             {{ $banner->is_active ? 'Aktif' : 'Nonaktif' }}
@@ -73,7 +86,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted" style="padding:32px;">
+                    <td colspan="8" class="text-center text-muted" style="padding:32px;">
                         <i class="fa fa-image" style="font-size:24px;display:block;margin-bottom:8px;opacity:.4;"></i>
                         Belum ada banner
                     </td>

@@ -59,4 +59,40 @@ class OrderController extends Controller
         return redirect()->route('customer.pesanan.index')
             ->with('success', 'Pesanan berhasil dibuat!');
     }
+
+    public function terima(Order $order)
+    {
+        if ($order->customer_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($order->status !== 'shipped') {
+            return back()->with('error', 'Pesanan belum dapat dikonfirmasi.');
+        }
+
+        $order->update([
+            'status' => 'delivered',
+        ]);
+
+        return redirect()->route('customer.pesanan.show', $order->id)
+            ->with('success', 'Pesanan telah dikonfirmasi diterima. Terima kasih!');
+    }
+
+    public function batal(Order $order)
+    {
+        if ($order->customer_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($order->status !== 'pending') {
+            return back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+        ]);
+
+        return redirect()->route('customer.pesanan.show', $order->id)
+            ->with('success', 'Pesanan berhasil dibatalkan.');
+    }
 }

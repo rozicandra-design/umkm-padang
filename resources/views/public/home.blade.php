@@ -826,6 +826,349 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </div>
 </section>
 
+@if(isset($banners) && $banners->count() > 0)
+<section class="banner-slider-section">
+  <div class="container">
+    <div class="bslider" id="bannerSlider">
+
+      {{-- Track --}}
+      <div class="bslider-track" id="bsliderTrack">
+        @foreach($banners as $i => $banner)
+          <div class="bslider-slide" data-index="{{ $i }}">
+            @if($banner->link)
+              <a href="{{ $banner->link }}" target="_blank" rel="noopener" class="bslider-link">
+            @endif
+              <img
+                src="{{ Storage::url($banner->image) }}"
+                alt="{{ $banner->title }}"
+                class="bslider-img"
+                loading="{{ $i === 0 ? 'eager' : 'lazy' }}"
+              >
+              @if($banner->title)
+                <div class="bslider-overlay">
+                  <div class="bslider-caption">
+                    <span class="bslider-caption-title">{{ $banner->title }}</span>
+                    @if($banner->link)
+                      <span class="bslider-caption-cta">
+                        Lihat Selengkapnya <i class="fa fa-arrow-right"></i>
+                      </span>
+                    @endif
+                  </div>
+                </div>
+              @endif
+            @if($banner->link)
+              </a>
+            @endif
+          </div>
+        @endforeach
+      </div>
+
+      {{-- Prev / Next --}}
+      @if($banners->count() > 1)
+        <button class="bslider-btn bslider-prev" id="bsliderPrev" aria-label="Sebelumnya">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <button class="bslider-btn bslider-next" id="bsliderNext" aria-label="Selanjutnya">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+
+        {{-- Dots --}}
+        <div class="bslider-dots" id="bsliderDots">
+          @foreach($banners as $i => $banner)
+            <button class="bslider-dot {{ $i === 0 ? 'active' : '' }}"
+                    data-index="{{ $i }}" aria-label="Slide {{ $i + 1 }}"></button>
+          @endforeach
+        </div>
+
+        {{-- Progress bar --}}
+        <div class="bslider-progress">
+          <div class="bslider-progress-bar" id="bsliderProgress"></div>
+        </div>
+      @endif
+
+    </div>
+  </div>
+</section>
+@endif
+
+{{-- ===== BANNER SLIDER STYLES ===== --}}
+@push('styles')
+<style>
+.banner-slider-section {
+  background: #fff;
+  padding: 20px 0 24px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.bslider {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.1);
+  user-select: none;
+  background: var(--gray-100);
+}
+
+/* Track */
+.bslider-track {
+  display: flex;
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.bslider-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  position: relative;
+  aspect-ratio: 16/5;
+  min-height: 160px;
+  max-height: 400px;
+  overflow: hidden;
+}
+@media(max-width:640px) {
+  .bslider-slide { aspect-ratio: 16/7; }
+}
+.bslider-link {
+  display: block;
+  width: 100%; height: 100%;
+}
+.bslider-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .6s ease;
+}
+.bslider-slide.active .bslider-img {
+  transform: scale(1.02);
+}
+
+/* Overlay */
+.bslider-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,.55) 0%,
+    rgba(0,0,0,.2) 50%,
+    transparent 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  padding: 28px 36px;
+}
+@media(max-width:640px) {
+  .bslider-overlay { padding: 16px 20px; }
+}
+.bslider-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 500px;
+}
+.bslider-caption-title {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+  font-family: 'Playfair Display', serif;
+}
+@media(max-width:640px) {
+  .bslider-caption-title { font-size: 16px; }
+}
+.bslider-caption-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-600);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 8px;
+  width: fit-content;
+  transition: background .2s;
+  box-shadow: 0 2px 8px rgba(22,163,74,.35);
+}
+.bslider-caption-cta:hover { background: var(--green-700); }
+
+/* Prev / Next buttons */
+.bslider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.9);
+  backdrop-filter: blur(6px);
+  border: none;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-700);
+  font-size: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.15);
+  transition: background .2s, transform .2s, opacity .2s;
+  z-index: 10;
+  opacity: 0;
+}
+.bslider:hover .bslider-btn { opacity: 1; }
+.bslider-prev { left: 14px; }
+.bslider-next { right: 14px; }
+.bslider-btn:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.1);
+}
+@media(max-width:640px) {
+  .bslider-btn { opacity: 1; width: 32px; height: 32px; font-size: 12px; }
+}
+
+/* Dots */
+.bslider-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+.bslider-dot {
+  width: 8px; height: 8px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.5);
+  border: none;
+  cursor: pointer;
+  transition: background .25s, width .25s;
+  padding: 0;
+}
+.bslider-dot.active {
+  background: #fff;
+  width: 24px;
+}
+
+/* Progress bar */
+.bslider-progress {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,.2);
+  z-index: 10;
+}
+.bslider-progress-bar {
+  height: 100%;
+  background: var(--green-500);
+  width: 0%;
+  transition: width linear;
+}
+</style>
+@endpush
+
+{{-- ===== BANNER SLIDER SCRIPT ===== --}}
+@push('scripts')
+<script>
+(function () {
+  const TOTAL     = {{ $banners->count() }};
+  const AUTO_MS   = 5000; // interval auto slide (ms)
+  if (TOTAL <= 1) return;
+
+  const track     = document.getElementById('bsliderTrack');
+  const dots      = document.querySelectorAll('.bslider-dot');
+  const progress  = document.getElementById('bsliderProgress');
+  const slides    = document.querySelectorAll('.bslider-slide');
+
+  let current   = 0;
+  let timer     = null;
+  let progTimer = null;
+  let paused    = false;
+
+  function goTo(idx) {
+    // Wrap around
+    idx = ((idx % TOTAL) + TOTAL) % TOTAL;
+
+    // Move track
+    track.style.transform = `translateX(-${idx * 100}%)`;
+
+    // Active slide (for zoom effect)
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+
+    // Dots
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+    current = idx;
+    resetProgress();
+  }
+
+  function resetProgress() {
+    clearTimeout(progTimer);
+    if (progress) {
+      progress.style.transition = 'none';
+      progress.style.width = '0%';
+      // Force reflow
+      void progress.offsetWidth;
+      progress.style.transition = `width ${AUTO_MS}ms linear`;
+      progress.style.width = '100%';
+    }
+  }
+
+  function startAuto() {
+    clearInterval(timer);
+    timer = setInterval(() => {
+      if (!paused) goTo(current + 1);
+    }, AUTO_MS);
+  }
+
+  // Init
+  goTo(0);
+  startAuto();
+
+  // Prev / Next
+  document.getElementById('bsliderPrev').addEventListener('click', () => {
+    goTo(current - 1);
+    startAuto();
+  });
+  document.getElementById('bsliderNext').addEventListener('click', () => {
+    goTo(current + 1);
+    startAuto();
+  });
+
+  // Dots
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      goTo(parseInt(dot.dataset.index));
+      startAuto();
+    });
+  });
+
+  // Pause on hover
+  const slider = document.getElementById('bannerSlider');
+  slider.addEventListener('mouseenter', () => { paused = true; });
+  slider.addEventListener('mouseleave', () => { paused = false; });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  slider.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    paused = true;
+  }, { passive: true });
+  slider.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      goTo(diff > 0 ? current + 1 : current - 1);
+      startAuto();
+    }
+    paused = false;
+  }, { passive: true });
+
+  // Keyboard arrow support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  { goTo(current - 1); startAuto(); }
+    if (e.key === 'ArrowRight') { goTo(current + 1); startAuto(); }
+  });
+})();
+</script>
+@endpush
+
+
 {{-- ===== SEARCH ===== --}}
 <section class="search-section">
   <div class="container">
